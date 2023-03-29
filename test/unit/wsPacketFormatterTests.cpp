@@ -1,12 +1,12 @@
 #include "wsPacketFormatterTests.h"
 
-int testDestWsPacket() {
+int testCoordsWsPacket() {
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
 	std::string author = "adrian";
 	std::string content = "this is a message!";
 
 	std::string packet = getNewWsPacket(dest, author, content);
-	return dest == getWsPacketDestCoords(packet);
+	return dest == getWsPacketCoords(packet);
 }
 
 int testAuthorWsPacket() {
@@ -30,7 +30,7 @@ int testContentWsPacket() {
 
 int testWsPacketFormatter() {
 	test tests[] = {
-		{ .function = testDestWsPacket, .name = "testDest" },
+		{ .function = testCoordsWsPacket, .name = "testCoords" },
 		{ .function = testAuthorWsPacket, .name = "testAuthor" },
 		{ .function = testContentWsPacket, .name = "testContent" }
 	};

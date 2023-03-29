@@ -1,6 +1,6 @@
 #include "wsPacketFormatter.h"
 
-coordinates getWsPacketDestCoords(std::string str) {
+coordinates getWsPacketCoords(std::string str) {
     std::string roi = "";
     for (int i = 2; i < str.size() && str[i] != '|'; i++)
         roi += str[i];

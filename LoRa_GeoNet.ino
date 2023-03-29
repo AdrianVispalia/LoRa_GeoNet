@@ -131,18 +131,19 @@ void handleWsMsg(void *arg, uint8_t *data, size_t len) {
         if (!checkWsPacketFormat((char*)data)) return;
 
         int type = data[0];
-        if (type != (int)GPS_MSG && type != (int)TXT_MSG) {
+        if (type != (int)GPS_MSG && type != (int)TXT_MSG) { // TODO: change later
                 displayString("Unknown msg: " + String((char*)data), 2000);
         }
         if (type == (int)TXT_MSG) {
               String wsPacket = (char*)data;
               ws.textAll(wsPacket.c_str());
-              String packet = getNewLoraPacket(getCoordinates(localPos), getWsPacketDestCoords(wsPacket.c_str()),
-                getWsPacketAuthor(wsPacket.c_str()), getWsPacketContent(wsPacket.c_str())).c_str();
-              transmitPacket(packet);
+              uint8_t tmpBuffer[MAX_LORA_PACKET_SIZE];
+              size_t tmpBufferLength = getNewLoraPacket(getCoordinates(localPos), getWsPacketCoords(wsPacket.c_str()),
+                getWsPacketAuthor(wsPacket.c_str()), getWsPacketContent(wsPacket.c_str()), &tmpBuffer[0]);
+              transmitPacket(&tmpBuffer[0], tmpBufferLength);
         }
         if (type == (int)GPS_MSG) {
-                localPos = getCartesianPoint(getWsPacketDestCoords((char*)data));
+                localPos = getCartesianPoint(getWsPacketCoords((char*)data));
         }
     }
 }
@@ -171,7 +172,7 @@ void initWebSocket() {
 }
 
 String wsProcessor(const String& var){
-    //Serial.println(var);
+    //Serial.println(var); // TODO: check if erasable
     // if(var == "STATE") { if (ledState) { return "ON"; } else { return "OFF"; } }
     return String();
 }
@@ -188,24 +189,24 @@ void loop() {
             packetBufferLength++;
         }
 
-        if (!checkLoraPacketFormat((&packetBuffer, packetBufferLength))
+        if (!checkLoraPacketFormat(&packetBuffer[0], packetBufferLength))
           return;
 
-        coordinates src = getLoraPacketSrcCoords(&packetBuffer, packetBufferLength);
-        coordinates dest = getLoraPacketDestCoords(&packetBuffer, packetBufferLength);
+        coordinates src = getLoraPacketSrcCoords(&packetBuffer[0], packetBufferLength);
+        coordinates dest = getLoraPacketDestCoords(&packetBuffer[0], packetBufferLength);
         if (getSphericalDistance(getCartesianPoint(src), getCartesianPoint(dest)) <= PROXIMITY_DISTANCE) {
             ws.textAll(getNewWsPacket(
                 dest,
-                getLoraPacketAuthor(&packetBuffer, packetBufferLength),
-                getLoraPacketContent(&packetBuffer, packetBufferLength)
+                getLoraPacketAuthor(&packetBuffer[0], packetBufferLength),
+                getLoraPacketContent(&packetBuffer[0], packetBufferLength)
             ).c_str());
         }
         
         if (retransmitDecision(src, dest, barrs, 0,  localPos)) {
-            transmitPacket(packetBuffer, packetBufferLength);
-            displayString("Retransmitting packet: " + String(recv), 300);
+            transmitPacket(&packetBuffer[0], packetBufferLength);
+            displayString("Retransmitting packet ", 300);
         }
         
-        displayString("Received: " + recv, 300);
+        displayString("Received a packet ", 300);
     }
 }

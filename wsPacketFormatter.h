@@ -12,7 +12,7 @@
 #define GPS_MSG '2'
 
 
-coordinates getWsPacketDestCoords(std::string str);
+coordinates getWsPacketCoords(std::string str);
 
 std::string getWsPacketAuthor(std::string str);
 
