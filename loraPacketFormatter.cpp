@@ -2,23 +2,23 @@
 
 coordinates getLoraPacketSrcCoords(uint8_t* packet, size_t packetSize) {
     coordinates coords = {
-        .lat = ((float*)packet)[0],
-        .lon = ((float*)packet)[1],
+        .lat = ((double*)packet)[0],
+        .lon = ((double*)packet)[1],
     };
     return coords;
 }
 
 coordinates getLoraPacketDestCoords(uint8_t* packet, size_t packetSize) {
     coordinates coords ={
-        .lat = ((float*)packet)[2],
-        .lon = ((float*)packet)[3],
+        .lat = ((double*)packet)[2],
+        .lon = ((double*)packet)[3],
     };
     return coords;
 }
 
 std::string getLoraPacketAuthor(uint8_t* packet, size_t packetSize) {
-    packet = packet + (sizeof(uint32_t) * 4) / sizeof(uint8_t);
-    packetSize -= (sizeof(uint32_t) * 4) / sizeof(uint8_t);
+    packet = packet + (sizeof(uint64_t) * 4) / sizeof(uint8_t);
+    packetSize -= (sizeof(uint64_t) * 4) / sizeof(uint8_t);
     int split;
     for (split = 0; split < packetSize; split++)
         if (packet[split] == (uint8_t)'|') break;
@@ -28,8 +28,8 @@ std::string getLoraPacketAuthor(uint8_t* packet, size_t packetSize) {
 }
 
 std::string getLoraPacketContent(uint8_t* packet, size_t packetSize) {
-    packet = packet + (sizeof(uint32_t) * 4) / sizeof(uint8_t);
-    packetSize -= (sizeof(uint32_t) * 4) / sizeof(uint8_t);
+    packet = packet + (sizeof(uint64_t) * 4) / sizeof(uint8_t);
+    packetSize -= (sizeof(uint64_t) * 4) / sizeof(uint8_t);
     int split;
     for (split = 0; split < packetSize - 1; split++)
         if (packet[split] == (uint8_t)'|') break;
@@ -40,14 +40,14 @@ std::string getLoraPacketContent(uint8_t* packet, size_t packetSize) {
 
 size_t getNewLoraPacket(coordinates src, coordinates dest, std::string author,
                 std::string content, uint8_t* bufferResult) {
-    float elements[4] = { src.lat, src.lon, dest.lat, dest.lon };
+    double elements[4] = { src.lat, src.lon, dest.lat, dest.lon };
     for (int i = 0; i < 4; i++)
-        ((uint32_t*)bufferResult)[i] = ((uint32_t*)elements)[i];
+        ((uint64_t*)bufferResult)[i] = ((uint64_t*)elements)[i];
 
     std::string segment = author + "|" + content;
-    strncpy((char*)(bufferResult + sizeof(uint32_t) * 4 / sizeof(uint8_t)),
+    strncpy((char*)(bufferResult + sizeof(uint64_t) * 4 / sizeof(uint8_t)),
                 segment.c_str(), segment.length());
-    return sizeof(uint32_t) * 4 / sizeof(uint8_t) + segment.length();
+    return sizeof(uint64_t) * 4 / sizeof(uint8_t) + segment.length();
 }
 
 int checkLoraPacketFormat(uint8_t* packet, size_t packetSize) {

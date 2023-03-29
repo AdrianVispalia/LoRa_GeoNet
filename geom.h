@@ -3,6 +3,9 @@
 
 #include <math.h>
 
+#define DEG_2_RAD			3.141592/180.0
+#define RAD_2_DEG			180.0/3.141592
+
 #define RADIUS					    6378137
 #define INVERSE_RADIUS_2		2.4581723e-14
 
@@ -14,7 +17,7 @@
 #define PRECISION_ERROR_POINT			0.1f
 
 struct vec3 {
-	float x, y, z;
+    double x, y, z;
 };
 
 typedef struct vec3 point;
@@ -22,51 +25,51 @@ typedef struct vec3 point;
 typedef struct vec3 vector;
 
 typedef struct {
-	point p;
+    point p;
     vector normal;
 } plane;
 
 typedef struct {
-	point p;
+    point p;
     vector direction;
 } line;
 
 typedef struct {
-	float lat;
-	float lon;
+    double lat;
+    double lon;
 } coordinates;
 
 typedef struct {
-	plane pl;
-	vector posUniVec;
-    float thresholdAngle;
+    plane pl;
+    vector posUniVec;
+    double thresholdAngle;
 } barrier;
 
-int approxEquals(float n1, float n2, float maxError);
+int approxEquals(double n1, double n2, double maxError);
 
 bool operator==(const coordinates& c1, const coordinates& c2);
 
 bool operator==(const point& p1, const point& p2);
 
-float getSphericalDistance(point p1, point p2);
+double getSphericalDistance(point p1, point p2);
 
-float getCartesianDistance(point p1, point p2);
+double getCartesianDistance(point p1, point p2);
 
 vector getVector(point src, point dest);
 
 line getLine(point src, point dest);
 
-float getPlaneD(plane pl);
+double getPlaneD(plane pl);
 
-float getVectorModule(vector v);
+double getVectorModule(vector v);
 
 vector getUniVector(vector v);
 
-float getAngleBetweenUniVectors(vector u1, vector u2);
+double getAngleBetweenUniVectors(vector u1, vector u2);
 
-float getArcLength(float angle);
+double getArcLength(double angle);
 
-float getArcAngle(float length);
+double getArcAngle(double length);
 
 int isRealPoint(point p);
 
@@ -76,7 +79,7 @@ point getCartesianPoint(coordinates coords);
 
 coordinates getCoordinates(point p);
 
-barrier getBarrier(coordinates position_coords, coordinates orientation_coords, float length);
+barrier getBarrier(coordinates position_coords, coordinates orientation_coords, double length);
 
 int hitsBarrier(barrier barr, point src, point dest);
 

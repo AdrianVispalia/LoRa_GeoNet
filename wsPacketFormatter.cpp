@@ -5,8 +5,8 @@ coordinates getWsPacketDestCoords(std::string str) {
     for (int i = 2; i < str.size() && str[i] != '|'; i++)
         roi += str[i];
     int split = roi.find(',');
-    float lat = std::stof(roi.substr(0, split));
-    float lon = std::stof(roi.substr(split + 1));
+    double lat = std::stof(roi.substr(0, split));
+    double lon = std::stof(roi.substr(split + 1));
     coordinates position = { .lat = lat, .lon = lon };
     return position;
 }

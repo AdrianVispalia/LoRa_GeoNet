@@ -350,7 +350,7 @@ const char index_html[] PROGMEM =    "<!DOCTYPE HTML>" \
   "            cursor: pointer;" \
   "            padding: 0px 0px;" \
   "            /* width: 5%; */" \
-  "            float: right;" \
+  "            double: right;" \
   "        }" \
   "        " \
   "        .online.message-submit:hover {" \
