@@ -3,8 +3,8 @@
 #clear
 
 
-g++ -o tmp-unit-test ./unit/* ../src/loraPacketFormatter.* \
-    ../src/geom.* ../src/wsPacketFormatter.*
+g++ -o tmp-unit-test ./unit/* ../loraPacketFormatter.* \
+    ../geom.* ../wsPacketFormatter.*
 ./tmp-unit-test
 
 read -p "Press enter to end the tests"

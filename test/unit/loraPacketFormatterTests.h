@@ -6,8 +6,8 @@
 
 #include "unit.h"
 
-#include "../../src/loraPacketFormatter.h"
-#include "../../src/geom.h"
+#include "../../loraPacketFormatter.h"
+#include "../../geom.h"
 
 int testLoraPacketFormatter();
 

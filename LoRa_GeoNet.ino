@@ -38,7 +38,8 @@ UniversalTelegramBot bot(BOTtoken, client);
 #endif
 
 
-
+uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
+size_t packetBufferLength = 0;
 OLED_SCREEN display(OLED_ADDR, OLED_SDA, OLED_SCL);
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -55,15 +56,15 @@ void displayString(String text, int delayTime) {
     delay(delayTime);
 }
 
-int transmitPacket(String packet) {
+int transmitPacket(uint8_t* packet, int packetSize) {
     while (LoRa.beginPacket()) { delay(10); };
-    //LoRa.write(msg.c_str(), msg.length());
-    LoRa.print(packet);
+    LoRa.write(packet, packetSize);
+    //LoRa.print(packet);
     int packetTransmitted = LoRa.endPacket();
-    displayString("LoRa sent: " + packet + " result: " + String(packetTransmitted), 300);
+    //displayString("LoRa sent: " + packet + " result: " + String(packetTransmitted), 300);
     #if DEBUG_TELEGRAM
-    coordinates coords = get_coordinates(localPos);
-    bot.sendMessage(CHAT_ID, author + String(" just sent: ") + packet + 
+    //coordinates coords = get_coordinates(localPos);
+    bot.sendMessage(CHAT_ID, author + String(" just sent: ") + String(packet) + 
       String(" from ") + String(coords.lat) + String(",") + String(coords.lon), "");
     #endif
     return packetTransmitted;
@@ -180,22 +181,28 @@ void loop() {
     displayString("Still running loop", 500); // TODO: remove later
 
     if (LoRa.parsePacket()) {
-        String recv = "";
+        packetBufferLength = 0;
+        memset(packetBuffer, 0, sizeof(packetBuffer));
         while (LoRa.available()) {
-            recv += (char)LoRa.read();
+            packetBuffer[packetBufferLength] = (uint8_t)LoRa.read();
+            packetBufferLength++;
         }
 
-        if (!checkLoraPacketFormat((uint8_t*)(recv.c_str()), recv.length()))
+        if (!checkLoraPacketFormat((&packetBuffer, packetBufferLength))
           return;
 
-        coordinates src = getLoraPacketSrcCoords((uint8_t*)(recv.c_str()));
-        coordinates dest = getLoraPacketDestCoords((uint8_t*)(recv.c_str()));
+        coordinates src = getLoraPacketSrcCoords(&packetBuffer, packetBufferLength);
+        coordinates dest = getLoraPacketDestCoords(&packetBuffer, packetBufferLength);
         if (getSphericalDistance(getCartesianPoint(src), getCartesianPoint(dest)) <= PROXIMITY_DISTANCE) {
-            ws.textAll(getNewWsPacket(dest, getLoraPacketAuthor((uint8_t*)(recv.c_str())), getLoraPacketContent((uint8_t*)(recv.c_str()))).c_str());
+            ws.textAll(getNewWsPacket(
+                dest,
+                getLoraPacketAuthor(&packetBuffer, packetBufferLength),
+                getLoraPacketContent(&packetBuffer, packetBufferLength)
+            ).c_str());
         }
         
         if (retransmitDecision(src, dest, barrs, 0,  localPos)) {
-            transmitPacket(recv);
+            transmitPacket(packetBuffer, packetBufferLength);
             displayString("Retransmitting packet: " + String(recv), 300);
         }
         

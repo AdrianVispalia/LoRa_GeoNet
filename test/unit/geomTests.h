@@ -6,7 +6,7 @@
 
 #include "unit.h"
 
-#include "../../src/geom.h"
+#include "../../geom.h"
 
 #define PRECISION_ERROR_CONV			0.1f
 

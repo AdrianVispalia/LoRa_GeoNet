@@ -7,8 +7,10 @@ int testSrcLoraPacket() {
 	std::string author = "adrian";
 	std::string content = "this is a message!";
 
-	std::string packet = getNewLoraPacket(src, dest, author, content);
-	return src == getLoraPacketSrcCoords((uint8_t*)packet.c_str());
+	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
+	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
+	coordinates tmp = getLoraPacketSrcCoords(packetBuffer, packetLength);
+	return src == getLoraPacketSrcCoords(packetBuffer, packetLength);
 }
 
 int testDestLoraPacket() {
@@ -17,8 +19,10 @@ int testDestLoraPacket() {
 	std::string author = "adrian";
 	std::string content = "this is a message!";
 
-	std::string packet = getNewLoraPacket(src, dest, author, content);
-	return dest == getLoraPacketDestCoords((uint8_t*)packet.c_str());
+	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
+	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
+	coordinates tmp = getLoraPacketSrcCoords(packetBuffer, packetLength);
+	return dest == getLoraPacketDestCoords(packetBuffer, packetLength);
 }
 
 int testAuthorLoraPacket() {
@@ -27,8 +31,9 @@ int testAuthorLoraPacket() {
 	std::string author = "adrian";
 	std::string content = "this is a message!";
 
-	std::string packet = getNewLoraPacket(src, dest, author, content);
-	return author == getLoraPacketAuthor((uint8_t*)packet.c_str());
+	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
+	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
+	return author == getLoraPacketAuthor(packetBuffer, packetLength);
 }
 
 int testContentLoraPacket() {
@@ -37,8 +42,9 @@ int testContentLoraPacket() {
 	std::string author = "adrian";
 	std::string content = "this is a message!";
 
-	std::string packet = getNewLoraPacket(src, dest, author, content);
-	return content == getLoraPacketContent((uint8_t*)packet.c_str());
+	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
+	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
+	return content == getLoraPacketContent(packetBuffer, packetLength);
 }
 
 

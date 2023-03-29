@@ -6,7 +6,7 @@ with open("./page.html", 'r') as f:
 if content is None:
     print("Content was None!!")
 
-with open("../src/pageHtml.h", 'w+') as f:
+with open("../pageHtml.h", 'w+') as f:
     f.write("#ifndef _PAGE_HTML_H\n#define _PAGE_HTML_H\nconst char index_html[] PROGMEM =  ")  
     lines = content.split("\n")
     num_lines = len(lines)

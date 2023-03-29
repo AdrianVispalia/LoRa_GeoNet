@@ -13,20 +13,21 @@ coordinates getWsPacketDestCoords(std::string str) {
 
 std::string getWsPacketAuthor(std::string str) {
     std::string tmp = str.substr(2);
-    tmp = tmp.substr(0, tmp.find('|'));
-    return tmp.substr(1, tmp.find('|'));
+    tmp = tmp.substr(tmp.find('|') + 1);
+    return tmp.substr(0, tmp.find('|'));
 }
 
 std::string getWsPacketContent(std::string str) {
     std::string tmp = str.substr(2);
-    tmp = tmp.substr(0, tmp.find('|'));
+    tmp = tmp.substr(tmp.find('|') + 1);
     return tmp.substr(tmp.find('|') + 1);
 }
 
 std::string getNewWsPacket(coordinates dest, std::string author, std::string message) {
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(2) << dest.lat << "," << dest.lon; // TO CHECK
-    std::string dest_str = stream.str();
+    std::string lat_str = std::to_string(dest.lat);
+    std::string lon_str = std::to_string(dest.lon);
+    std::string dest_str = lat_str.substr(0, lat_str.find(".") + 3) + "," +
+        lon_str.substr(0, lon_str.find(".") + 3);
     return "1|" + dest_str + "|" + author + "|" + message;
 }
 

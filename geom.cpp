@@ -1,11 +1,11 @@
 #include "geom.h"
 
 int approxEquals(float n1, float n2, float maxError) {
-	float diff = n1 - n2;
-	if (diff < 0)
-		diff = -diff;
+    float diff = n1 - n2;
+    if (diff < 0)
+        diff = -diff;
 
-	return diff <= maxError;
+    return diff <= maxError;
 }
 
 bool operator==(const coordinates& c1, const coordinates& c2) {
@@ -40,17 +40,17 @@ vector getVector(point src, point dest) {
 }
 
 float getVectorModule(vector v) {
-	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
 vector getUniVector(vector v) {
-	float module = getVectorModule(v);
-	vector result = {
-		.x = v.x / module,
-		.y = v.y / module,
-		.z = v.z / module,
-	};
-	return result;
+    float module = getVectorModule(v);
+    vector result = {
+        .x = v.x / module,
+        .y = v.y / module,
+        .z = v.z / module,
+    };
+    return result;
 }
 
 line getLine(point src, point dest) {
@@ -66,7 +66,7 @@ float getPlaneD(plane pl) {
 }
 
 float getAngleBetweenUniVectors(vector u1, vector u2) {
-	return acos(u1.x * u2.x + u1.y * u2.y + u1.z * u2.z);
+    return acos(u1.x * u2.x + u1.y * u2.y + u1.z * u2.z);
 }
 
 float getArcLength(float angle) {
@@ -135,7 +135,7 @@ int hitsBarrier(barrier barr, point src, point dest) {
 
     if (!isRealPoint(impactPoint))
         return 0;
-    
+
     float realAngle = getAngleBetweenUniVectors(barr.posUniVec,  getUniVector(impactPoint));
     return realAngle <= barr.thresholdAngle;
 }
@@ -147,14 +147,14 @@ int retransmitDecision(coordinates srcCoords, coordinates destCoords, barrier *b
 
     if (distance < MIN_DISTANCE)
         return 0;
-    
+
     if (distance >= BOUNCE_DISTANCE)
         return getSphericalDistance(nodePos, dest) < distance - ORIGIN_NODE_SEPARATION;
-    
+
     for (int i = 0; i < size; i++) {
         if (hitsBarrier(barrs[i], src, dest))
             return 1;
     }
-    
+
     return 0;
 }

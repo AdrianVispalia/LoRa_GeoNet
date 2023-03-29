@@ -6,8 +6,8 @@
 
 #include "unit.h"
 
-#include "../../src/wsPacketFormatter.h"
-#include "../../src/geom.h"
+#include "../../wsPacketFormatter.h"
+#include "../../geom.h"
 
 int testWsPacketFormatter();
 
