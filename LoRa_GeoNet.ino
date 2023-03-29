@@ -203,7 +203,7 @@ void loop() {
         }
         
         if (retransmitDecision(src, dest, barrs, 0,  localPos)) {
-            transmitPacket(&packetBuffer[0], packetBufferLength);
+            transmitPacket(&packetBuffer[0], packetBufferLength); // TODO: check if change src
             displayString("Retransmitting packet ", 300);
         }
         
