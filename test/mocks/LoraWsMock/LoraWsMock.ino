@@ -5,6 +5,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <UniversalTelegramBot.h>
+
 #include "secrets.h"
 #include "geom.h"
 #include "wsPacketFormatter.h"
@@ -192,20 +193,11 @@ void loop() {
         if (!checkLoraPacketFormat(&packetBuffer[0], packetBufferLength))
           return;
 
-        coordinates src = getLoraPacketSrcCoords(&packetBuffer[0], packetBufferLength);
-        coordinates dest = getLoraPacketDestCoords(&packetBuffer[0], packetBufferLength);
-        if (getSphericalDistance(getCartesianPoint(src), getCartesianPoint(dest)) <= PROXIMITY_DISTANCE) {
-            ws.textAll(getNewWsPacket(
-                dest,
+        ws.textAll(getNewWsPacket(
+                getLoraPacketDestCoords(&packetBuffer[0], packetBufferLength),
                 getLoraPacketAuthor(&packetBuffer[0], packetBufferLength),
                 getLoraPacketContent(&packetBuffer[0], packetBufferLength)
-            ).c_str());
-        }
-
-        if (retransmitDecision(src, dest, barrs, 0,  localPos)) {
-            transmitPacket(&packetBuffer[0], packetBufferLength); // TODO: check if change src
-            displayString("Retransmitting packet ", 300);
-        }
+        ).c_str());
 
         displayString("Received a packet ", 300);
     }
