@@ -2,6 +2,23 @@
 
 Proyect with the purpose of creating a long range, low cost messaging infrastructure using LoRa technology.
 
+## Getting started
+
+This project needs you to create a file `secrets.h` inside the project folder with the content:
+```h
+#define AP_SSID         ""
+#define AP_PASSWORD     ""
+
+#define WIFI_SSID       ""
+#define WIFI_PASSWORD   ""
+
+#define BOT_TOKEN        ""
+#define CHAT_ID         ""
+```
+
+Also, to use the loraWsMock it is needed to create a symbolic link in that folder to the `secrets.h` file in the project folder.
+
+> Note: The loraWsMock has Windows symbolic links. It would not work in Linux unless these files are replace with Linux symbolic links
 
 ## Architecture
 
