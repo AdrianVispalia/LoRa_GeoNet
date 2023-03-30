@@ -129,7 +129,7 @@ barrier getBarrier(coordinates positionCoords, coordinates orientationCoords, do
     return barr;
 }
 
-int hitsBarrier(barrier barr, point src, point dest) {
+int hitsBarrier(barrier barr, point src, point dest) { // TODO: take account sphere
     line trajectory = getLine(src, dest);
     point impactPoint = getIntersectionLinePlane(trajectory, barr.pl);
 
