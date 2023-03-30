@@ -34,7 +34,7 @@
 
 #if DEBUG_TELEGRAM
 WiFiClientSecure client;
-UniversalTelegramBot bot(BOTtoken, client);
+UniversalTelegramBot bot(BOT_TOKEN, client);
 #endif
 
 
