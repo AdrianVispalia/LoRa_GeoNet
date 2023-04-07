@@ -169,6 +169,13 @@
         .target-container input {
             background: rgba(255, 255, 255, 0.427);
             border-radius: 4px;
+            width: 12%;
+        }
+        
+        @media(max-width: 730px) {
+            .target-container input {
+                width: 10%;
+            }
         }
         
          ::-webkit-scrollbar {
@@ -469,7 +476,7 @@
                 <div class="messages-content"></div>
             </div>
             <div class="message-box online">
-                <textarea type="text" class="message-input online" id="message" placeholder="Mensaje"></textarea>
+                <textarea type="text" class="message-input online" id="message" placeholder="Message"></textarea>
 
                 <svg width="24" height="24" class="message-submit online" id="send-message">
            <path fill="currentColor" d="M 1.101 21.757 L 23.8 12.028 L 1.101 2.3 l 2.899 7.7 l 10.967 1.606 l -10.878 2.404 l -2.932 7.764 z"></path>
@@ -483,7 +490,7 @@
         </div>
     </div>
     <script>
-        // WebSocket Section
+        /* WebSocket Section */
         var gateway = 'ws://' + window.location.hostname + '/ws';
         var websocket;
 
@@ -504,7 +511,7 @@
         function onClose(event) {
             changeStatus();
             console.log('Connection closed');
-            //setTimeout(initWebSocket, 2000); // try to reconnect
+            /* setTimeout(initWebSocket, 2000); // try to reconnect */
         }
 
         function onMessage(event) {
@@ -526,16 +533,17 @@
             }
         }
 
-        // Msg GUI & logic section
+        /* Msg GUI & logic section */
         function addMsgToChat(event) {
             let messages_content = document.getElementsByClassName("messages-content")[0];
             const node = document.createElement("div");
             node.classList.add("message");
-            node.innerHTML = event.data.split("|")[2] +
-                ': ' + event.data.split("|")[3];
             if (event.data.split("|")[2] == username) {
+                node.innerHTML = event.data.split("|")[3];
                 node.classList.add("message-personal", "online");
                 document.getElementsByClassName("message-input")[0].value = "";
+            } else {
+                node.innerHTML = event.data.split("|")[2] + ': ' + event.data.split("|")[3];
             }
             messages_content.appendChild(node);
             document.getElementsByClassName("messages-content")[0].scrollIntoView(false);
@@ -581,7 +589,7 @@
                 1000);
         }
 
-        // Offline functinality
+        /* Offline functinality */
         function changeStatus() {
             reconnect_delay = window.innerWidth > 420 ? 400 : 1200;
             isOnline = (isOnline + 1) % 2;
@@ -613,7 +621,7 @@
                 reconnect.classList.remove("reconnect-appear");
                 reconnect.classList.add("reconnect-disappear");
                 setTimeout(function() {
-                        reconnect.style.display = "none"
+                        reconnect.style.display = "none";
                     },
                     reconnect_delay);
             } else {
@@ -629,8 +637,9 @@
         var username = "-";
         var nodeCoords;
 
-        // Send GPS locations + obtain name
+        /* Send GPS locations + obtain name */
         window.onload = function() {
+            console.log("start");
             setTimeout(function() {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(position => {
@@ -639,10 +648,10 @@
                             "," + String(nodeCoords.latitude));
                     });
                 } else {
-                    document.alert("Didn't obtain GPS location. Node may not work")
+                    document.alert("Didn't obtain GPS location. Node may not work");
                 }
 
-                username = prompt("Your username: ", "-");
+                username = prompt("Your username: ", "username");
             }, 1800);
 
 
@@ -653,7 +662,7 @@
             setTimeout(function() {
                 reconnect.style.display = "inline-block";
                 reconnect.classList.add("reconnect-appear");
-            }, reconnect_delay); // */
+            }, reconnect_delay); */
 
             reconnect.addEventListener("click", function() {
                 reconnect.classList.remove('rotation-class');
@@ -667,12 +676,12 @@
             send_button.addEventListener("click", function() {
                 send_button.classList.remove('send-class');
                 setTimeout(function() {
-                    send_button.classList.add('send-class')
+                    send_button.classList.add('send-class');
                 }, 5);
             }, false);
 
             initWebSocket();
-            console.log("Web socket iniciado!");
+            console.log("Web socket started!");
         };
 
         document.getElementsByClassName("message-submit")[0].onclick = () => sendMessage();
@@ -681,7 +690,7 @@
             if (event.which === 13) {
                 document.getElementById("send-message").classList.remove('send-class');
                 setTimeout(function() {
-                    document.getElementById("reconnect").classList.add('send-class')
+                    document.getElementById("reconnect").classList.add('send-class');
                 }, 5);
                 sendMessage();
                 return false;

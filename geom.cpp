@@ -130,6 +130,8 @@ barrier getBarrier(coordinates positionCoords, coordinates orientationCoords, do
 }
 
 int hitsBarrier(barrier barr, point src, point dest) { // TODO: take account sphere
+    // 1: check distance sign, has to be different
+    // 2: check line intersection with line barrier angle
     line trajectory = getLine(src, dest);
     point impactPoint = getIntersectionLinePlane(trajectory, barr.pl);
 

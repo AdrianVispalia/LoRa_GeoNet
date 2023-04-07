@@ -180,7 +180,7 @@ String wsProcessor(const String& var){
 
 void loop() {
     ws.cleanupClients();
-    displayString("Still running loop", 500); // TODO: remove later
+    // displayString("Still running loop", 500); // TODO: remove later
 
     if (LoRa.parsePacket()) {
         packetBufferLength = 0;
