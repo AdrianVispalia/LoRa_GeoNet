@@ -51,12 +51,14 @@ class Node {
 
 			coordinates src = getLoraPacketSrcCoords(packetIn.buffer, packetIn.packetSize);
 			coordinates dest = getLoraPacketDestCoords(packetIn.buffer, packetIn.packetSize);
-			printMsg("processing this packet with the msg: " +
+			printMsg("processing this packet with (msg: " +
 						getLoraPacketContent(packetIn.buffer, packetIn.packetSize) +
-						" from: " +
+						" | from: " +
 						getLoraPacketAuthor(packetIn.buffer, packetIn.packetSize) +
-						" src: " + std::to_string(src.lat) + ", " + std::to_string(src.lon) +
-						" dest: " + std::to_string(dest.lat) + ", " + std::to_string(dest.lon));
+						" | src: " + std::to_string(src.lat) +
+						", " + std::to_string(src.lon) +
+						" | dest: " + std::to_string(dest.lat) +
+						", " + std::to_string(dest.lon) + ")");
 			std::this_thread::sleep_for(std::chrono::milliseconds(300));
 			if (getSphericalDistance(getCartesianPoint(src), getCartesianPoint(dest)) < PROXIMITY_DISTANCE) {
 				printMsg("this packet was sent to our area!");

@@ -2,6 +2,7 @@
 #define _GEOM_H
 
 #include <math.h>
+#include <stdint.h>
 
 #define DEG_2_RAD			3.141592/180.0
 #define RAD_2_DEG			180.0/3.141592
@@ -15,6 +16,16 @@
 
 #define PRECISION_ERROR_COORDS			0.1f
 #define PRECISION_ERROR_POINT			0.1f
+
+#define COORD_DOUBLE_PRECISION			1
+
+#ifdef COORD_DOUBLE_PRECISION
+    typedef double coord_dt;
+    typedef uint64_t coord_byte_dt;
+#else
+    typedef float coord_dt;
+    typedef uint32_t coord_byte_dt;
+#endif
 
 struct vec3 {
     double x, y, z;
