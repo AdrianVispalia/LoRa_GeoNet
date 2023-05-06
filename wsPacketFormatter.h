@@ -11,16 +11,19 @@
 #define TXT_MSG '1'
 #define GPS_MSG '2'
 
+#define MAX_WS_PACKET_SIZE	220 // TODO: better bufferSize
+#define MAX_AUTHOR_LEN          25
+#define MAX_CONTENT_LEN         140
 
-coordinates getWsPacketCoords(std::string str);
+coordinates getWsPacketCoords(const char * str);
 
-std::string getWsPacketAuthor(std::string str);
+const char * getWsPacketAuthor(const char * str);
 
-std::string getWsPacketContent(std::string str);
+const char * getWsPacketContent(const char * str);
 
-std::string getNewWsPacket(coordinates dest, std::string author, std::string message);
+const char * getNewWsPacket(coordinates dest, const char * author, const char * message);
 
-int checkWsPacketFormat(std::string str);
+int checkWsPacketFormat(const char * str);
 
 
 #endif

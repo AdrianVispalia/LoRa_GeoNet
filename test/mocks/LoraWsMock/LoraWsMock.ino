@@ -38,6 +38,7 @@ WiFiClientSecure client;
 UniversalTelegramBot bot(BOT_TOKEN, client);
 #endif
 
+#pragma once
 
 uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
 size_t packetBufferLength = 0;
@@ -62,7 +63,7 @@ int transmitPacket(uint8_t* packet, int packetSize) {
     LoRa.write(packet, packetSize);
     //LoRa.print(packet);
     int packetTransmitted = LoRa.endPacket();
-    //displayString("LoRa sent: " + packet + " result: " + String(packetTransmitted), 300);
+    displayString("LoRa sent: " + String((char*)packet) + " result: " + String(packetTransmitted), 300);
     #if DEBUG_TELEGRAM
     //coordinates coords = get_coordinates(localPos);
     bot.sendMessage(CHAT_ID, author + String(" just sent: ") + String(packet) +
@@ -111,8 +112,8 @@ void setup() {
 
 
     WiFi.softAP(AP_SSID, AP_PASSWORD);
-    Serial.printf("AP: %s\n", WiFi.softAPIP().toString().c_str());
-    displayString(String(WiFi.softAPIP()), 500);
+    //Serial.printf("AP: %s\n", WiFi.softAPIP().toString().c_str());
+    displayString("AP: " + String(WiFi.softAPIP()), 500);
 
     initWebSocket();
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -127,25 +128,51 @@ void setup() {
 
 void handleWsMsg(void *arg, uint8_t *data, size_t len) {
     AwsFrameInfo *info = (AwsFrameInfo*)arg;
-    if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-        data[len] = 0;
-        if (!checkWsPacketFormat((char*)data)) return;
 
-        int type = data[0];
-        if (type != (int)GPS_MSG && type != (int)TXT_MSG) { // TODO: change later
-                displayString("Unknown msg: " + String((char*)data), 2000);
-        }
-        if (type == (int)TXT_MSG) {
-              String wsPacket = (char*)data;
-              ws.textAll(wsPacket.c_str());
-              uint8_t tmpBuffer[MAX_LORA_PACKET_SIZE];
-              size_t tmpBufferLength = getNewLoraPacket(getCoordinates(localPos), getWsPacketCoords(wsPacket.c_str()),
-                getWsPacketAuthor(wsPacket.c_str()), getWsPacketContent(wsPacket.c_str()), &tmpBuffer[0]);
-              transmitPacket(&tmpBuffer[0], tmpBufferLength);
-        }
-        if (type == (int)GPS_MSG) {
-                localPos = getCartesianPoint(getWsPacketCoords((char*)data));
-        }
+    if (!(info->final) || info->index != 0 || info->len != len || info->opcode != WS_TEXT) return;
+    
+    //if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    data[len] = 0;
+    if (!checkWsPacketFormat((char*)data)) return;
+
+    char packet_type = (char)data[0];
+    displayString("WsMsg: " + String((char*)data), 2000);
+    size_t bSize = 0;
+    uint8_t tmpBuffer[MAX_LORA_PACKET_SIZE];
+    String wsPacket = "";
+    coordinates thisp, coords;
+    const char * author;
+    const char * content;
+
+    switch (packet_type) {
+      case TXT_MSG:
+        Serial.println("txt msg");
+        //const char * content = getWsPacketContent(wsPacket.c_str());
+        //displayString("About to transmit in lora: " + String(content), 2000);
+        wsPacket = String((char*)data);
+        ws.textAll(wsPacket.c_str());
+        Serial.println("after wsTextAll");
+        thisp = getCoordinates(localPos);
+        Serial.println("after this coords");
+        coords = getWsPacketCoords(wsPacket.c_str());
+        Serial.println("after packet coords");
+        author = getWsPacketAuthor(wsPacket.c_str());
+        Serial.println("after get author");
+        content = getWsPacketContent(wsPacket.c_str());
+        Serial.println("after get content");
+        bSize = getNewLoraPacket(thisp, coords,
+            author, content, &tmpBuffer[0]);
+        Serial.println("before transmit packet");
+        transmitPacket(&tmpBuffer[0], bSize);
+        Serial.println("after transmit packet");
+        break;
+      case GPS_MSG:
+        displayString("GPS msg it was", 2000);
+        localPos = getCartesianPoint(getWsPacketCoords((char*)data));
+        break;
+      default:
+        displayString("Unknown msg: " + String((char*)data), 2000);
+        break;
     }
 }
 
@@ -197,8 +224,8 @@ void loop() {
                 getLoraPacketDestCoords(&packetBuffer[0], packetBufferLength),
                 getLoraPacketAuthor(&packetBuffer[0], packetBufferLength),
                 getLoraPacketContent(&packetBuffer[0], packetBufferLength)
-        ).c_str());
+        ));
 
-        displayString("Received a packet ", 300);
+        displayString("Received a LoRa packet ", 300);
     }
 }

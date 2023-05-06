@@ -4,8 +4,8 @@
 int testSrcLoraPacket() {
 	coordinates src = { .lat = 0.5, .lon = 1.7 };
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
-	std::string author = "adrian";
-	std::string content = "this is a message!";
+	const char * author = "adrian";
+	const char * content = "this is a message!";
 
 	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
 	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
@@ -16,8 +16,8 @@ int testSrcLoraPacket() {
 int testDestLoraPacket() {
 	coordinates src = { .lat = 0.5, .lon = 1.7 };
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
-	std::string author = "adrian";
-	std::string content = "this is a message!";
+	const char * author = "adrian";
+	const char * content = "this is a message!";
 
 	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
 	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
@@ -28,23 +28,24 @@ int testDestLoraPacket() {
 int testAuthorLoraPacket() {
 	coordinates src = { .lat = 0.5, .lon = 1.7 };
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
-	std::string author = "adrian";
-	std::string content = "this is a message!";
+	const char * author = "adrian";
+	const char * content = "this is a message!";
 
 	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
 	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
-	return author == getLoraPacketAuthor(packetBuffer, packetLength);
+
+	return strcmp(author, getLoraPacketAuthor(packetBuffer, packetLength)) == 0;
 }
 
 int testContentLoraPacket() {
 	coordinates src = { .lat = 0.5, .lon = 1.7 };
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
-	std::string author = "adrian";
-	std::string content = "this is a message!";
+	const char * author = "adrian";
+	const char * content = "this is a message!";
 
 	uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
 	size_t packetLength = getNewLoraPacket(src, dest, author, content, packetBuffer);
-	return content == getLoraPacketContent(packetBuffer, packetLength);
+	return strcmp(content, getLoraPacketContent(packetBuffer, packetLength)) == 0;
 }
 
 

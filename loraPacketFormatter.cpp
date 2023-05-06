@@ -1,6 +1,6 @@
 #include "loraPacketFormatter.h"
 
-coordinates getLoraPacketSrcCoords(uint8_t* packet, size_t packetSize) {
+coordinates getLoraPacketSrcCoords(uint8_t * packet, size_t packetSize) {
     coordinates coords = {
         .lat = ((coord_dt*)packet)[0],
         .lon = ((coord_dt*)packet)[1],
@@ -8,7 +8,7 @@ coordinates getLoraPacketSrcCoords(uint8_t* packet, size_t packetSize) {
     return coords;
 }
 
-coordinates getLoraPacketDestCoords(uint8_t* packet, size_t packetSize) {
+coordinates getLoraPacketDestCoords(uint8_t * packet, size_t packetSize) {
     coordinates coords ={
         .lat = ((coord_dt*)packet)[2],
         .lon = ((coord_dt*)packet)[3],
@@ -16,18 +16,22 @@ coordinates getLoraPacketDestCoords(uint8_t* packet, size_t packetSize) {
     return coords;
 }
 
-std::string getLoraPacketAuthor(uint8_t* packet, size_t packetSize) {
+const char * getLoraPacketAuthor(uint8_t * packet, size_t packetSize) {
     packet = packet + (sizeof(coord_byte_dt) * 4) / sizeof(uint8_t);
     packetSize -= (sizeof(coord_byte_dt) * 4) / sizeof(uint8_t);
     int split;
     for (split = 0; split < packetSize; split++)
         if (packet[split] == (uint8_t)'|') break;
 
-    packet[split] = '\0';
-    return (char*)packet;
+    char* buffer = (char*)malloc(split + 1);
+    if (buffer == NULL) return NULL;
+
+    buffer[split] = '\0';
+    strncpy((char*)buffer, (char*)packet, split);
+    return (const char *)buffer;
 }
 
-std::string getLoraPacketContent(uint8_t* packet, size_t packetSize) {
+const char * getLoraPacketContent(uint8_t * packet, size_t packetSize) {
     packet = packet + (sizeof(coord_byte_dt) * 4) / sizeof(uint8_t);
     packetSize -= (sizeof(coord_byte_dt) * 4) / sizeof(uint8_t);
     int split;
@@ -35,22 +39,32 @@ std::string getLoraPacketContent(uint8_t* packet, size_t packetSize) {
         if (packet[split] == (uint8_t)'|') break;
 
     packet = packet + (split + 1) * sizeof(uint8_t);
-    return (char*)packet;
+    char* buffer = (char*)malloc(packetSize - split);
+    if (buffer == NULL) return NULL;
+    
+    strncpy((char*)buffer, (char*)packet, packetSize - split - 1);
+    buffer[strnlen((char*)packet, packetSize - split - 1)] = '\0';
+    return (const char *)buffer;
 }
 
-size_t getNewLoraPacket(coordinates src, coordinates dest, std::string author,
-                std::string content, uint8_t* bufferResult) {
+size_t getNewLoraPacket(coordinates src, coordinates dest, const char * author,
+                const char * content, uint8_t* buffer) {
     coord_dt elements[4] = { src.lat, src.lon, dest.lat, dest.lon };
     for (int i = 0; i < 4; i++)
-        ((coord_byte_dt*)bufferResult)[i] = ((coord_byte_dt*)elements)[i];
+        ((coord_byte_dt*)buffer)[i] = ((coord_byte_dt*)elements)[i];
 
-    std::string segment = author + "|" + content;
-    strncpy((char*)(bufferResult + sizeof(coord_byte_dt) * 4 / sizeof(uint8_t)),
-                segment.c_str(), segment.length());
-    return sizeof(coord_byte_dt) * 4 / sizeof(uint8_t) + segment.length();
+    size_t bufferLength = sizeof(coord_byte_dt) * 4 / sizeof(uint8_t);
+    size_t authorLength = strnlen(author, MAX_AUTHOR_LEN);
+    size_t contentLength = strnlen(content, MAX_CONTENT_LEN);
+
+    strncpy((char*)(buffer + bufferLength), author, authorLength);
+    buffer[bufferLength + authorLength] = (uint8_t)'|';
+
+    strncpy((char*)(buffer + bufferLength + authorLength + 1), content, contentLength);
+    return sizeof(coord_byte_dt) * 4 / sizeof(uint8_t) + authorLength + 1 + contentLength;
 }
 
-int checkLoraPacketFormat(uint8_t* packet, size_t packetSize) {
+int checkLoraPacketFormat(uint8_t * packet, size_t packetSize) {
     if (packetSize < 7)
         return 0;
 

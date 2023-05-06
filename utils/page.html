@@ -88,7 +88,7 @@
             animation-fill-mode: forwards;
         }
         
-        .bg {
+        #main-frame {
             top: 0;
             left: 0;
             height: 100vh;
@@ -458,7 +458,7 @@
 </head>
 
 <body>
-    <div class="bg online">
+    <div class="bg online" id="main-frame">
         <div class="chat">
             <div class="chat-title">
                 <h1>LoRa GeoNet</h1>
@@ -473,10 +473,10 @@
                 </form>
             </div>
             <div class="messages">
-                <div class="messages-content"></div>
+                <div class="messages-content" id="messages-container"></div>
             </div>
-            <div class="message-box online">
-                <textarea type="text" class="message-input online" id="message" placeholder="Message"></textarea>
+            <div class="message-box online" id="message-textarea-container">
+                <textarea type="text" class="message-input online" id="message-textarea" placeholder="Message"></textarea>
 
                 <svg width="24" height="24" class="message-submit online" id="send-message">
            <path fill="currentColor" d="M 1.101 21.757 L 23.8 12.028 L 1.101 2.3 l 2.899 7.7 l 10.967 1.606 l -10.878 2.404 l -2.932 7.764 z"></path>
@@ -500,18 +500,18 @@
             websocket.onopen = onOpen;
             websocket.onclose = onClose;
             websocket.onmessage = onMessage;
-            if (isOnline == false) changeStatus();
+            if (isOnline == false) changeStatus(false);
         }
 
         function onOpen(event) {
-            changeStatus();
+            changeStatus(true);
             console.log('Connection opened');
         }
 
         function onClose(event) {
-            changeStatus();
+            changeStatus(false);
             console.log('Connection closed');
-            /* setTimeout(initWebSocket, 2000); // try to reconnect */
+            setTimeout(initWebSocket, 2000); // try to reconnect */
         }
 
         function onMessage(event) {
@@ -535,18 +535,18 @@
 
         /* Msg GUI & logic section */
         function addMsgToChat(event) {
-            let messages_content = document.getElementsByClassName("messages-content")[0];
+            let messages_content = document.getElementById("messages-container");
             const node = document.createElement("div");
             node.classList.add("message");
             if (event.data.split("|")[2] == username) {
                 node.innerHTML = event.data.split("|")[3];
                 node.classList.add("message-personal", "online");
-                document.getElementsByClassName("message-input")[0].value = "";
+                document.getElementById("message-textarea").value = "";
             } else {
                 node.innerHTML = event.data.split("|")[2] + ': ' + event.data.split("|")[3];
             }
             messages_content.appendChild(node);
-            document.getElementsByClassName("messages-content")[0].scrollIntoView(false);
+            messages_content.scrollIntoView(false);
         }
 
         var reconnect_delay = window.innerWidth > 420 ? 400 : 1200;
@@ -565,7 +565,7 @@
         }
 
         function sendMessage() {
-            let message = document.getElementById("message").value;
+            let message = document.getElementById("message-textarea").value;
 
             if (checkMsg(message) == false) {
                 return;
@@ -576,9 +576,11 @@
                 String(document.getElementById("latitude").value) + "|" +
                 String(username) + "|" +
                 String(message));
-            document.getElementById("message").value = "";
+            document.getElementById("message-textarea").value = "";
+            console.log("sent this through websocket: " + message);
 
-            let last = document.getElementsByClassName("messages-content")[0].lastElementChild;
+            /*
+            let last = document.getElementById("messages-container").lastElementChild;
             last.classList.add('new-message');
             setTimeout(
                 function() {
@@ -587,18 +589,18 @@
                     last.classList.remove(isOnline ? "offline" : "online");
                 },
                 1000);
+            */
         }
 
         /* Offline functinality */
-        function changeStatus() {
+        function changeStatus(isOnline) {
             reconnect_delay = window.innerWidth > 420 ? 400 : 1200;
-            isOnline = (isOnline + 1) % 2;
             console.log("changeStatus: " + isOnline);
 
-            let elements = [document.getElementsByClassName("bg")[0],
-                document.getElementsByClassName("message-input")[0],
-                document.getElementsByClassName("message-box")[0],
-                document.getElementsByClassName("message-submit")[0]
+            let elements = [document.getElementById("main-frame"),
+                document.getElementById("message-textarea-container"),
+                document.getElementById("message-textarea"),
+                document.getElementById("send-message")
             ];
             let messages_personal = document.getElementsByClassName("message-personal");
             let reconnect = document.getElementById("reconnect");
@@ -684,7 +686,7 @@
             console.log("Web socket started!");
         };
 
-        document.getElementsByClassName("message-submit")[0].onclick = () => sendMessage();
+        document.getElementById("send-message").onclick = () => sendMessage();
 
         document.addEventListener('keydown', (event) => {
             if (event.which === 13) {

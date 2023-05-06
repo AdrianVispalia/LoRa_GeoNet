@@ -2,29 +2,29 @@
 
 int testCoordsWsPacket() {
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
-	std::string author = "adrian";
-	std::string content = "this is a message!";
+	const char * author = "adrian";
+	const char * content = "this is a message!";
 
-	std::string packet = getNewWsPacket(dest, author, content);
+	const char * packet = getNewWsPacket(dest, author, content);
 	return dest == getWsPacketCoords(packet);
 }
 
 int testAuthorWsPacket() {
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
-	std::string author = "adrian";
-	std::string content = "this is a message!";
+	const char * author = "adrian";
+	const char * content = "this is a message!";
 
-	std::string packet = getNewWsPacket(dest, author, content);
-	return author == getWsPacketAuthor(packet);
+	const char * packet = getNewWsPacket(dest, author, content);
+	return strcmp(author, getWsPacketAuthor(packet)) == 0;
 }
 
 int testContentWsPacket() {
 	coordinates dest = { .lat = 0.7, .lon = 2.3 };
-	std::string author = "adrian";
-	std::string content = "this is a message!";
+	const char * author = "adrian";
+	const char * content = "this is a message!";
 
-	std::string packet = getNewWsPacket(dest, author, content);
-	return content == getWsPacketContent(packet);
+	const char * packet = getNewWsPacket(dest, author, content);
+	return strcmp(content, getWsPacketContent(packet)) == 0;
 }
 
 

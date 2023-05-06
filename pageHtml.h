@@ -90,7 +90,7 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
             animation-fill-mode: forwards;\n\ 
         }\n\ 
         \n\ 
-        .bg {\n\ 
+        #main-frame {\n\ 
             top: 0;\n\ 
             left: 0;\n\ 
             height: 100vh;\n\ 
@@ -460,7 +460,7 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
 </head>\n\ 
 \n\ 
 <body>\n\ 
-    <div class=\"bg online\">\n\ 
+    <div class=\"bg online\" id=\"main-frame\">\n\ 
         <div class=\"chat\">\n\ 
             <div class=\"chat-title\">\n\ 
                 <h1>LoRa GeoNet</h1>\n\ 
@@ -475,10 +475,10 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
                 </form>\n\ 
             </div>\n\ 
             <div class=\"messages\">\n\ 
-                <div class=\"messages-content\"></div>\n\ 
+                <div class=\"messages-content\" id=\"messages-container\"></div>\n\ 
             </div>\n\ 
-            <div class=\"message-box online\">\n\ 
-                <textarea type=\"text\" class=\"message-input online\" id=\"message\" placeholder=\"Message\"></textarea>\n\ 
+            <div class=\"message-box online\" id=\"message-textarea-container\">\n\ 
+                <textarea type=\"text\" class=\"message-input online\" id=\"message-textarea\" placeholder=\"Message\"></textarea>\n\ 
 \n\ 
                 <svg width=\"24\" height=\"24\" class=\"message-submit online\" id=\"send-message\">\n\ 
            <path fill=\"currentColor\" d=\"M 1.101 21.757 L 23.8 12.028 L 1.101 2.3 l 2.899 7.7 l 10.967 1.606 l -10.878 2.404 l -2.932 7.764 z\"></path>\n\ 
@@ -502,18 +502,18 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
             websocket.onopen = onOpen;\n\ 
             websocket.onclose = onClose;\n\ 
             websocket.onmessage = onMessage;\n\ 
-            if (isOnline == false) changeStatus();\n\ 
+            if (isOnline == false) changeStatus(false);\n\ 
         }\n\ 
 \n\ 
         function onOpen(event) {\n\ 
-            changeStatus();\n\ 
+            changeStatus(true);\n\ 
             console.log('Connection opened');\n\ 
         }\n\ 
 \n\ 
         function onClose(event) {\n\ 
-            changeStatus();\n\ 
+            changeStatus(false);\n\ 
             console.log('Connection closed');\n\ 
-            /* setTimeout(initWebSocket, 2000); // try to reconnect */\n\ 
+            setTimeout(initWebSocket, 2000); // try to reconnect */\n\ 
         }\n\ 
 \n\ 
         function onMessage(event) {\n\ 
@@ -537,17 +537,18 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
 \n\ 
         /* Msg GUI & logic section */\n\ 
         function addMsgToChat(event) {\n\ 
-            let messages_content = document.getElementsByClassName(\"messages-content\")[0];\n\ 
+            let messages_content = document.getElementById(\"messages-container\");\n\ 
             const node = document.createElement(\"div\");\n\ 
             node.classList.add(\"message\");\n\ 
-            node.innerHTML = event.data.split(\"|\")[2] +\n\ 
-                ': ' + event.data.split(\"|\")[3];\n\ 
             if (event.data.split(\"|\")[2] == username) {\n\ 
+                node.innerHTML = event.data.split(\"|\")[3];\n\ 
                 node.classList.add(\"message-personal\", \"online\");\n\ 
-                document.getElementsByClassName(\"message-input\")[0].value = \"\";\n\ 
+                document.getElementById(\"message-textarea\").value = \"\";\n\ 
+            } else {\n\ 
+                node.innerHTML = event.data.split(\"|\")[2] + ': ' + event.data.split(\"|\")[3];\n\ 
             }\n\ 
             messages_content.appendChild(node);\n\ 
-            document.getElementsByClassName(\"messages-content\")[0].scrollIntoView(false);\n\ 
+            messages_content.scrollIntoView(false);\n\ 
         }\n\ 
 \n\ 
         var reconnect_delay = window.innerWidth > 420 ? 400 : 1200;\n\ 
@@ -566,7 +567,7 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
         }\n\ 
 \n\ 
         function sendMessage() {\n\ 
-            let message = document.getElementById(\"message\").value;\n\ 
+            let message = document.getElementById(\"message-textarea\").value;\n\ 
 \n\ 
             if (checkMsg(message) == false) {\n\ 
                 return;\n\ 
@@ -577,9 +578,11 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
                 String(document.getElementById(\"latitude\").value) + \"|\" +\n\ 
                 String(username) + \"|\" +\n\ 
                 String(message));\n\ 
-            document.getElementById(\"message\").value = \"\";\n\ 
+            document.getElementById(\"message-textarea\").value = \"\";\n\ 
+            console.log(\"sent this through websocket: \" + message);\n\ 
 \n\ 
-            let last = document.getElementsByClassName(\"messages-content\")[0].lastElementChild;\n\ 
+            /*\n\ 
+            let last = document.getElementById(\"messages-container\").lastElementChild;\n\ 
             last.classList.add('new-message');\n\ 
             setTimeout(\n\ 
                 function() {\n\ 
@@ -588,18 +591,18 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
                     last.classList.remove(isOnline ? \"offline\" : \"online\");\n\ 
                 },\n\ 
                 1000);\n\ 
+            */\n\ 
         }\n\ 
 \n\ 
         /* Offline functinality */\n\ 
-        function changeStatus() {\n\ 
+        function changeStatus(isOnline) {\n\ 
             reconnect_delay = window.innerWidth > 420 ? 400 : 1200;\n\ 
-            isOnline = (isOnline + 1) % 2;\n\ 
             console.log(\"changeStatus: \" + isOnline);\n\ 
 \n\ 
-            let elements = [document.getElementsByClassName(\"bg\")[0],\n\ 
-                document.getElementsByClassName(\"message-input\")[0],\n\ 
-                document.getElementsByClassName(\"message-box\")[0],\n\ 
-                document.getElementsByClassName(\"message-submit\")[0]\n\ 
+            let elements = [document.getElementById(\"main-frame\"),\n\ 
+                document.getElementById(\"message-textarea-container\"),\n\ 
+                document.getElementById(\"message-textarea\"),\n\ 
+                document.getElementById(\"send-message\")\n\ 
             ];\n\ 
             let messages_personal = document.getElementsByClassName(\"message-personal\");\n\ 
             let reconnect = document.getElementById(\"reconnect\");\n\ 
@@ -640,6 +643,7 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
 \n\ 
         /* Send GPS locations + obtain name */\n\ 
         window.onload = function() {\n\ 
+            console.log(\"start\");\n\ 
             setTimeout(function() {\n\ 
                 if (navigator.geolocation) {\n\ 
                     navigator.geolocation.getCurrentPosition(position => {\n\ 
@@ -651,7 +655,7 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
                     document.alert(\"Didn't obtain GPS location. Node may not work\");\n\ 
                 }\n\ 
 \n\ 
-                username = prompt(\"Your username: \", \"-\");\n\ 
+                username = prompt(\"Your username: \", \"username\");\n\ 
             }, 1800);\n\ 
 \n\ 
 \n\ 
@@ -684,7 +688,7 @@ const char index_html[] PROGMEM =  "<!DOCTYPE HTML>\n\
             console.log(\"Web socket started!\");\n\ 
         };\n\ 
 \n\ 
-        document.getElementsByClassName(\"message-submit\")[0].onclick = () => sendMessage();\n\ 
+        document.getElementById(\"send-message\").onclick = () => sendMessage();\n\ 
 \n\ 
         document.addEventListener('keydown', (event) => {\n\ 
             if (event.which === 13) {\n\ 
