@@ -4,7 +4,16 @@
 #include <WiFiClientSecure.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <QueueList.h>
+//#include <QueueArray.h>
+//#include <ArduinoQueue.h>
+
+
+#define DEBUG_TELEGRAM 0
+
+#if DEBUG_TELEGRAM
 #include <UniversalTelegramBot.h>
+#endif
 
 #include "secrets.h"
 #include "geom.h"
@@ -31,15 +40,23 @@
 #define LORA_BAND     868E6
 
 #define PROXIMITY_DISTANCE 1000
-#define DEBUG_TELEGRAM 0
+#define NODE_NAME "LoRa Node - A"
 
 #if DEBUG_TELEGRAM
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOT_TOKEN, client);
 #endif
 
-#pragma once
+#pragma once // TODO: check if needed
 
+struct ArrayInfo {
+  uint8_t* data;
+  size_t size;
+};
+//QueueArray<uint8_t[MAX_LORA_PACKET_SIZE]> msgQueue;
+//ArduinoQueue<uint8_t[MAX_LORA_PACKET_SIZE]> msgQueue(4);
+//QueueList<uint8_t> msgSizeQueue;
+QueueList<ArrayInfo> msgQueue;
 uint8_t packetBuffer[MAX_LORA_PACKET_SIZE];
 size_t packetBufferLength = 0;
 OLED_SCREEN display(OLED_ADDR, OLED_SDA, OLED_SCL);
@@ -59,16 +76,22 @@ void displayString(String text, int delayTime) {
 }
 
 int transmitPacket(uint8_t* packet, int packetSize) {
-    while (LoRa.beginPacket()) { delay(10); };
+    while (LoRa.beginPacket()) {
+    //  delay(10);
+    };
+    Serial.println("before LoRa write");
     LoRa.write(packet, packetSize);
     //LoRa.print(packet);
+    Serial.println("after LoRa write");
     int packetTransmitted = LoRa.endPacket();
-    displayString("LoRa sent: " + String((char*)packet) + " result: " + String(packetTransmitted), 300);
+    //displayString("LoRa sent: " + String((char*)packet) + " result: " + String(packetTransmitted), 300);
+    Serial.println("LoRa sent: " + String((char*)packet) + " result: " + String(packetTransmitted));
+
     #if DEBUG_TELEGRAM
-    //coordinates coords = get_coordinates(localPos);
     bot.sendMessage(CHAT_ID, author + String(" just sent: ") + String(packet) +
       String(" from ") + String(coords.lat) + String(",") + String(coords.lon), "");
     #endif
+
     return packetTransmitted;
 }
 
@@ -88,7 +111,7 @@ void setup() {
     display.init();
     display.flipScreenVertically();
     display.setFont(ArialMT_Plain_16);
-    displayString("LoRa Node - A", 1000);
+    displayString(NODE_NAME, 1000);
 
     #if DEBUG_TELEGRAM
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -115,10 +138,13 @@ void setup() {
     //Serial.printf("AP: %s\n", WiFi.softAPIP().toString().c_str());
     displayString("AP: " + String(WiFi.softAPIP()), 500);
 
+
     initWebSocket();
+
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send_P(200, "text/html", index_html, wsProcessor);
     });
+
     server.on("/Telegram_Logo.svg", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send_P(200, "image/svg+xml", icon_xml, wsProcessor);
     });
@@ -130,8 +156,8 @@ void handleWsMsg(void *arg, uint8_t *data, size_t len) {
     AwsFrameInfo *info = (AwsFrameInfo*)arg;
 
     if (!(info->final) || info->index != 0 || info->len != len || info->opcode != WS_TEXT) return;
-    
     //if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    
     data[len] = 0;
     if (!checkWsPacketFormat((char*)data)) return;
 
@@ -143,6 +169,7 @@ void handleWsMsg(void *arg, uint8_t *data, size_t len) {
     coordinates thisp, coords;
     const char * author;
     const char * content;
+    struct ArrayInfo msg;
 
     switch (packet_type) {
       case TXT_MSG:
@@ -151,20 +178,26 @@ void handleWsMsg(void *arg, uint8_t *data, size_t len) {
         //displayString("About to transmit in lora: " + String(content), 2000);
         wsPacket = String((char*)data);
         ws.textAll(wsPacket.c_str());
-        Serial.println("after wsTextAll");
+        //Serial.println("after wsTextAll");
         thisp = getCoordinates(localPos);
-        Serial.println("after this coords");
+        //Serial.println("after this coords");
         coords = getWsPacketCoords(wsPacket.c_str());
-        Serial.println("after packet coords");
+        //Serial.println("after packet coords");
         author = getWsPacketAuthor(wsPacket.c_str());
-        Serial.println("after get author");
+        //Serial.println("after get author");
         content = getWsPacketContent(wsPacket.c_str());
-        Serial.println("after get content");
+        //Serial.println("after get content");
         bSize = getNewLoraPacket(thisp, coords,
             author, content, &tmpBuffer[0]);
-        Serial.println("before transmit packet");
-        transmitPacket(&tmpBuffer[0], bSize);
-        Serial.println("after transmit packet");
+        Serial.println("before pushing the transmit packet");
+        msg.data = (uint8_t*)malloc(sizeof(uint8_t) * MAX_LORA_PACKET_SIZE);
+        msg.size = bSize;
+        memcpy(msg.data, tmpBuffer, bSize);
+        msgQueue.push(msg);
+        //msgQueue.enqueue(tmpBuffer);
+        //msgSizeQueue.push(bSize);
+        //transmitPacket(&tmpBuffer[0], bSize);
+        Serial.println("after pushing the transmit packet");
         break;
       case GPS_MSG:
         displayString("GPS msg it was", 2000);
@@ -227,5 +260,21 @@ void loop() {
         ));
 
         displayString("Received a LoRa packet ", 300);
+    }
+
+    //if (!msgQueue.isEmpty() && !msgSizeQueue.isEmpty()) {
+    if (!msgQueue.isEmpty()) {
+      Serial.println("msgQueue poping 1 msg");
+      //packetBuffer = msgQueue.pop();
+      //msgQueue.pop(packetBuffer);
+      //packetBufferLength = msgSizeQueue.pop();
+      //Serial.println("Obtained msg: " + String(getLoraPacketContent(&packetBuffer[0], packetBufferLength)));
+      struct ArrayInfo msg = msgQueue.pop();
+      Serial.println("Obtained msg: " + String(getLoraPacketContent(msg.data, msg.size)));
+
+     Serial.println("before REAL transmit packet");
+     transmitPacket(msg.data, msg.size);
+     Serial.println("after REAL transmit packet");
+      
     }
 }
