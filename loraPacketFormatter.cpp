@@ -41,7 +41,7 @@ const char * getLoraPacketContent(uint8_t * packet, size_t packetSize) {
     packet = packet + (split + 1) * sizeof(uint8_t);
     char* buffer = (char*)malloc(packetSize - split);
     if (buffer == NULL) return NULL;
-    
+
     strncpy((char*)buffer, (char*)packet, packetSize - split - 1);
     buffer[strnlen((char*)packet, packetSize - split - 1)] = '\0';
     return (const char *)buffer;
@@ -69,11 +69,11 @@ int checkLoraPacketFormat(uint8_t * packet, size_t packetSize) {
         return 0;
 
     int counter = 0;
-    for (int i = 0; i < packetSize; i++)
+    for (int i = sizeof(coord_byte_dt) * 4 / sizeof(uint8_t); i < packetSize; i++)
         if (packet[i] == '|') counter++;
 
-    if (counter != 1)
+    if (counter == 1)
         return 0;
 
-    return 1;
+    return -(counter + 1);
 }

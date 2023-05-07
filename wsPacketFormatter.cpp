@@ -9,7 +9,7 @@ coordinates getWsPacketCoords(const char * str) {
             break;
         }
     }
-    
+
     if (split == -1) return {nan(""), nan("")};
 
     //coordinates position = {

@@ -76,7 +76,7 @@ void displayString(String text, int delayTime) {
 }
 
 int transmitPacket(uint8_t* packet, int packetSize) {
-    while (LoRa.beginPacket()) {
+    while (!LoRa.beginPacket()) {
     //  delay(10);
     };
     Serial.println("before LoRa write");
@@ -250,8 +250,13 @@ void loop() {
             packetBufferLength++;
         }
 
-        if (!checkLoraPacketFormat(&packetBuffer[0], packetBufferLength))
+        Serial.println("LoRa packet received, content: " + String(getLoraPacketContent(&packetBuffer[0], packetBufferLength)));
+
+        Serial.println("checkFormat: " + String(checkLoraPacketFormat(&packetBuffer[0], packetBufferLength)));
+        if (checkLoraPacketFormat(&packetBuffer[0], packetBufferLength) != 0) {
+          Serial.println("LoRa packet has invalid format!!!!!!!!!!");
           return;
+        }
 
         ws.textAll(getNewWsPacket(
                 getLoraPacketDestCoords(&packetBuffer[0], packetBufferLength),
