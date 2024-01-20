@@ -2,6 +2,22 @@
 
 Proyect with the purpose of creating a long range, low cost messaging infrastructure using LoRa technology.
 
+
+Do you want to send messages between 2 phones without using the conventional cellular network? With this project, you can! You need:
+- 2 phones
+- 2 or more esp32 with LoRa antennas and batteries
+
+> The range between 2 LoRa devices can be higher than 10 Km if they are within line of sight!
+
+
+The steps required:
+1. Download and change the code to fit your devices
+2. Compile it and upload it to the boards
+3. Set the LoRa devices close to the phones and within line of sight of each other
+4. Connect your phone to the WiFi of the closest LoRa device
+5. Open your browser and put on the URL the IP or the network router
+6. You can now send messages!
+
 ## Getting started
 
 This project needs you to create a file `secrets.h` inside the project folder with the content:
@@ -16,9 +32,7 @@ This project needs you to create a file `secrets.h` inside the project folder wi
 #define CHAT_ID         ""
 ```
 
-Also, to use the loraWsMock it is needed to create a symbolic link in that folder to the `secrets.h` file in the project folder.
-
-> Note: The loraWsMock has Windows symbolic links. It would not work in Linux unless these files are replace with Linux symbolic links
+> To use the loraWsMock (to test the code, not needed to use the project) it is needed to create a symbolic link in that folder to the `secrets.h` file in the project folder. The loraWsMock has Windows symbolic links. It would not work in Linux unless these files are replace with Linux symbolic links
 
 ## Architecture
 
