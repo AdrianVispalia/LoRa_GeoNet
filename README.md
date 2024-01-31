@@ -9,12 +9,12 @@ Do you want to send messages between 2 phones without using the conventional cel
 
 > The range between 2 LoRa devices can be higher than 10 Km if they are within line of sight!
 
-The interface on the phone would look like this:
-![](./images/phone_screen.jpeg)
 
+How does it look?:
+| Phone screen | LoRa devices |
+| - | - |
+| ![](./images/phone_screen.jpeg) | ![](./images/devices.jpeg) |
 
-The devices required (2 at least) with batteries and case would look like this:
-![](./images/devices.jpeg)
 
 
 ## Getting started
