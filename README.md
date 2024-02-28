@@ -16,13 +16,16 @@ How does it look?:
 | ![](./images/phone_screen.jpeg) | ![](./images/devices.jpeg) |
 
 How are messages sent/received on a 2 node architecture:
+
 ![](./images/message_diagram.png)
 
 How messages are sent/received with a multiple-node architecture:
+
 ![](./images/multi_node_diagram.png)
 
 
 How the application works:
+
 ![](./images/application_diagram.png)
 
 ## Getting started
