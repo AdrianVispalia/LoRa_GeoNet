@@ -18,6 +18,10 @@ How does it look?:
 How are messages sent/received on a 2 node architecture:
 ![](./images/message_diagram.png)
 
+How messages are sent/received with a multiple-node architecture:
+![](./images/multi_node_diagram.png)
+
+
 ## Getting started
 
 <details>
