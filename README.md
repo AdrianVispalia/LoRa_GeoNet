@@ -22,6 +22,9 @@ How messages are sent/received with a multiple-node architecture:
 ![](./images/multi_node_diagram.png)
 
 
+How the application works:
+![](./images/application_diagram.png)
+
 ## Getting started
 
 <details>
