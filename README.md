@@ -15,7 +15,8 @@ How does it look?:
 | - | - |
 | ![](./images/phone_screen.jpeg) | ![](./images/devices.jpeg) |
 
-
+How are messages sent/received on a 2 node architecture:
+![](./images/message_diagram.svg)
 
 ## Getting started
 
