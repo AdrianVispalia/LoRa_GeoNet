@@ -32,7 +32,17 @@ How the application works:
 
 <details>
 
+### Dependencies
 
+- ESPAsyncWebServer: https://github.com/ESP32Async/ESPAsyncWebServer/
+- AsyncTCP: https://github.com/ESP32Async/AsyncTCP
+- LoRa: https://github.com/sandeepmistry/arduino-LoRa
+- OLED display: https://github.com/ThingPulse/esp8266-oled-ssd1306
+- Arduino JSON: https://github.com/bblanchon/ArduinoJson
+- QRCodeGenerator: https://github.com/felixerdy/QRCodeGenerator
+
+
+### Project
 
 The steps required:
 1. Download and change the code to fit your devices
@@ -46,15 +56,11 @@ This project needs you to create a file `secrets.h` inside the project folder wi
 ```h
 #define AP_SSID         ""
 #define AP_PASSWORD     ""
-
-#define WIFI_SSID       ""
-#define WIFI_PASSWORD   ""
-
-#define BOT_TOKEN        ""
-#define CHAT_ID         ""
 ```
 
 > To use the loraWsMock (to test the code, not needed to use the project) it is needed to create a symbolic link in that folder to the `secrets.h` file in the project folder. The loraWsMock has Windows symbolic links. It would not work in Linux unless these files are replace with Linux symbolic links
+
+> Note: Tested with the esp32 library version 2.0.0, board TTGO LoRa32-OLED V1 (for LilyGO esp32 LoRa v1.3)
 
 </details>
 
